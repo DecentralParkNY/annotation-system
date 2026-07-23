@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MARGIN — the annotation layer for everything</title>
+<style>
+  :root{
+    --paper:#F5F2EA;
+    --paper-2:#EFEBE0;
+    --ink:#16140F;
+    --ink-soft:#5F5A4E;
+    --rule:#DBD5C6;
+    --hi:#FFD84D;
+    --hi-soft:#FFEFA8;
+    --blue:#2B3FE0;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:"Inter","Helvetica Neue",Helvetica,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1px);
+    background-size:22px 22px;
+  }
+
+  /* ── chrome ─────────────────────────────────────────────── */
+  .bar{
+    display:flex;align-items:center;gap:18px;padding:14px 26px;
+    border-bottom:1px solid var(--rule);background:rgba(245,242,234,.82);
+    backdrop-filter:blur(10px);position:sticky;top:0;z-index:20;
+  }
+  .logo{display:flex;align-items:baseline;gap:9px;font-weight:800;letter-spacing:-.055em;font-size:19px}
+  .logo i{
+    width:13px;height:20px;background:var(--hi);display:inline-block;border-radius:2px;
+    transform:skewX(-11deg);box-shadow:2px 2px 0 var(--ink);
+  }
+  .crumb{font-size:12.5px;color:var(--ink-soft);letter-spacing:.01em}
+  .crumb b{color:var(--ink);font-weight:600}
+  .bar .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .who{display:flex}
+  .who span{
+    width:26px;height:26px;border-radius:50%;border:2px solid var(--paper);
+    margin-left:-8px;font:600 10px/22px var(--sans);text-align:center;color:#fff;
+  }
+  .who span:first-child{margin-left:0}
+  .pill{
+    font-size:12px;font-weight:600;padding:7px 13px;border-radius:99px;
+    border:1px solid var(--ink);background:transparent;cursor:pointer;
+  }
+  .pill.solid{background:var(--ink);color:var(--paper)}
+
+  /* ── hero pitch ─────────────────────────────────────────── */
+  .pitch{padding:46px 26px 30px;max-width:1180px;margin:0 auto}
+  .kicker{
+    font-size:11px;font-weight:700;letter-spacing:.19em;text-transform:uppercase;
+    color:var(--ink-soft);margin-bottom:16px;
+  }
+  h1{
+    font-family:var(--serif);font-weight:400;font-size:clamp(31px,5.4vw,62px);
+    line-height:1.03;letter-spacing:-.025em;margin:0;max-width:16ch;
+  }
+  h1 em{
+    font-style:normal;background:linear-gradient(transparent 58%,var(--hi) 58%);
+    padding:0 .06em;
+  }
+
+  /* ── the workspace ──────────────────────────────────────── */
+  .work{
+    max-width:1180px;margin:26px auto 70px;padding:0 26px;
+    display:grid;grid-template-columns:minmax(0,1fr) 296px;gap:26px;align-items:start;
+  }
+  .doc{
+    background:#FFFDF7;border:1px solid var(--rule);border-radius:5px;
+    padding:40px 46px 46px;box-shadow:0 1px 0 var(--rule),0 22px 44px -30px rgba(0,0,0,.35);
+    position:relative;
+  }
+  .doc h2{font-family:var(--serif);font-weight:400;font-size:27px;margin:0 0 4px;letter-spacing:-.01em}
+  .doc .meta{font-size:11.5px;color:var(--ink-soft);margin-bottom:26px;letter-spacing:.02em}
+  .doc p{font-family:var(--serif);font-size:17.5px;line-height:1.68;margin:0 0 17px;color:#221F18}
+  .doc p::selection,.doc p *::selection{background:var(--hi)}
+  mark{
+    background:var(--hi-soft);box-shadow:inset 0 -2px 0 var(--hi);
+    border-radius:2px;padding:0 1px;cursor:pointer;
+  }
+  mark.live{animation:pop .45s cubic-bezier(.2,1.5,.4,1)}
+  @keyframes pop{0%{background:var(--hi);transform:scale(1.02)}100%{background:var(--hi-soft)}}
+
+  .hint{
+    position:absolute;left:46px;bottom:-15px;display:inline-flex;align-items:center;gap:8px;
+    background:var(--ink);color:var(--paper);font-size:11.5px;font-weight:600;
+    padding:7px 14px;border-radius:99px;box-shadow:0 6px 18px -8px rgba(0,0,0,.7);
+    transition:opacity .3s,transform .3s;
+  }
+  .hint.gone{opacity:0;transform:translateY(6px)}
+  .hint b{width:6px;height:6px;border-radius:50%;background:var(--hi);animation:blink 1.4s infinite}
+  @keyframes blink{50%{opacity:.25}}
+
+  /* ── margin rail ────────────────────────────────────────── */
+  .rail-head{
+    display:flex;align-items:center;justify-content:space-between;
+    font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-soft);margin:8px 2px 12px;
+  }
+  .rail-head span{font-family:var(--sans);letter-spacing:0;text-transform:none;font-weight:600;font-size:11.5px}
+  .note{
+    background:#FFFDF7;border:1px solid var(--rule);border-left:3px solid var(--hi);
+    border-radius:4px;padding:12px 14px;margin-bottom:11px;
+    box-shadow:0 10px 22px -20px rgba(0,0,0,.6);
+    animation:fly .42s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes fly{from{opacity:0;transform:translateX(16px) rotate(1.2deg)}}
+  .note .top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .note .av{width:20px;height:20px;border-radius:50%;font:700 9px/20px var(--sans);text-align:center;color:#fff}
+  .note .nm{font-size:11.5px;font-weight:700}
+  .note .tm{font-size:10.5px;color:var(--ink-soft);margin-left:auto}
+  .note q{
+    display:block;font-family:var(--serif);font-size:12.5px;color:var(--ink-soft);
+    border-left:2px solid var(--rule);padding-left:8px;margin:0 0 8px;quotes:none;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .note .body{font-size:13px;line-height:1.5}
+  .note .body[contenteditable]:empty:before{content:attr(data-ph);color:#A9A296}
+  .note .body:focus{outline:none}
+  .note .tags{margin-top:9px;display:flex;gap:5px;flex-wrap:wrap}
+  .tag{font-size:10px;font-weight:700;letter-spacing:.04em;padding:3px 7px;border-radius:99px;background:var(--paper-2);color:var(--ink-soft)}
+  .tag.b{background:var(--blue);color:#fff}
+  .note.new{border-left-color:var(--blue)}
+
+  .layers{
+    margin-top:20px;border-top:1px solid var(--rule);padding-top:14px;
+    font-size:12px;color:var(--ink-soft);
+  }
+  .layer{display:flex;align-items:center;gap:9px;padding:6px 0}
+  .sw{width:22px;height:12px;border-radius:99px;background:var(--rule);position:relative;transition:background .2s}
+  .sw:after{content:"";position:absolute;top:2px;left:2px;width:8px;height:8px;border-radius:50%;background:#fff;transition:left .2s}
+  .layer.on .sw{background:var(--ink)}
+  .layer.on .sw:after{left:12px}
+  .layer.on{color:var(--ink);font-weight:600}
+  .layer{cursor:pointer;user-select:none}
+
+  @media(max-width:880px){.work{grid-template-columns:1fr}.doc{padding:28px 24px}.hint{left:24px}}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="logo"><i></i>MARGIN</div>
+  <div class="crumb">Workspace · Field Research / <b>Interview — Site 04.pdf</b></div>
+  <div class="right">
+    <div class="who">
+      <span style="background:#2B3FE0">RK</span>
+      <span style="background:#C0392B">JD</span>
+      <span style="background:#1E7A5A">AM</span>
+    </div>
+    <button class="pill">Share</button>
+    <button class="pill solid">Publish layer</button>
+  </div>
+</div>
+
+<div class="pitch">
+  <div class="kicker">Margin · the annotation layer</div>
+  <h1>Highlight anything, anywhere — and your <em>notes find each other</em>.</h1>
+</div>
+
+<div class="work">
+  <div class="doc" id="doc">
+    <h2>Interview transcript — Site 04</h2>
+    <div class="meta">18 pages · 3 collaborators · 41 annotations · last touched 6m ago</div>
+
+    <p id="p1">The operators described the alarm system as <mark>"something you learn to hear past"</mark> — a phrase that recurred, unprompted, in four of the six interviews we conducted on site this spring.</p>
+
+    <p>Nobody had disabled anything. The tolerance was social, not technical: a shared understanding, never written down, of which sounds meant <em>now</em> and which meant <em>eventually</em>. That distinction lived entirely in the crew's collective memory, and it walked out the door with every retirement.</p>
+
+    <p>When we asked what would happen if the whole night shift turned over at once, the answer came back with unusual speed. <mark>"Then you'd have a room full of people who believe every alarm."</mark> The line was delivered as a joke. It was not received as one.</p>
+
+    <p>Select any sentence above to leave a note in the margin — every highlight becomes an anchor other people can reply to, six months from now, from a different document entirely.</p>
+
+    <div class="hint" id="hint"><b></b> Select any text to annotate</div>
+  </div>
+
+  <div>
+    <div class="rail-head">Margin <span id="count">2 notes</span></div>
+    <div id="rail">
+      <div class="note">
+        <div class="top"><div class="av" style="background:#C0392B">JD</div><div class="nm">Jaya Deshmukh</div><div class="tm">2d</div></div>
+        <q>"something you learn to hear past"</q>
+        <div class="body">This is the whole finding. Same phrasing appeared in the 2021 audit — linking that annotation here.</div>
+        <div class="tags"><span class="tag b">↳ 1 linked note</span><span class="tag">theme: alarm fatigue</span></div>
+      </div>
+      <div class="note">
+        <div class="top"><div class="av" style="background:#1E7A5A">AM</div><div class="nm">Ada Mbeki</div><div class="tm">6h</div></div>
+        <q>"a room full of people who believe every alarm"</q>
+        <div class="body">Pull-quote candidate. Flagging for the exec summary.</div>
+        <div class="tags"><span class="tag">pull-quote</span></div>
+      </div>
+    </div>
+
+    <div class="layers">
+      <div class="layer on" onclick="this.classList.toggle('on')"><div class="sw"></div>My layer</div>
+      <div class="layer on" onclick="this.classList.toggle('on')"><div class="sw"></div>Team layer · 3</div>
+      <div class="layer" onclick="this.classList.toggle('on')"><div class="sw"></div>Public layer · 212</div>
+      <div class="layer" onclick="this.classList.toggle('on')"><div class="sw"></div>Machine suggestions</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var doc = document.getElementById('doc'),
+      rail = document.getElementById('rail'),
+      hint = document.getElementById('hint'),
+      count = document.getElementById('count'),
+      n = 2;
+
+  doc.addEventListener('mouseup', function () {
+    var sel = window.getSelection();
+    if (!sel || sel.isCollapsed) return;
+    var r = sel.getRangeAt(0), txt = sel.toString().trim();
+    if (txt.length < 3 || !doc.contains(r.commonAncestorContainer)) return;
+
+    var m = document.createElement('mark');
+    m.className = 'live';
+    try { r.surroundContents(m); }
+    catch (e) { m.appendChild(r.extractContents()); r.insertNode(m); }
+    sel.removeAllRanges();
+
+    hint.classList.add('gone');
+    addNote(txt.length > 62 ? txt.slice(0, 62) + '…' : txt);
+  });
+
+  function addNote(quote) {
+    var el = document.createElement('div');
+    el.className = 'note new';
+    el.innerHTML =
+      '<div class="top"><div class="av" style="background:#2B3FE0">RK</div>' +
+      '<div class="nm">You</div><div class="tm">now</div></div>' +
+      '<q>“' + quote + '”</q>' +
+      '<div class="body" contenteditable data-ph="Type your note…"></div>' +
+      '<div class="tags"><span class="tag b">anchored</span><span class="tag">my layer</span></div>';
+    rail.insertBefore(el, rail.firstChild);
+    el.querySelector('.body').focus();
+    count.textContent = (++n) + ' notes';
+  }
+</script>
+</body>
+</html>
